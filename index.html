@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorem Ipsum Discovery Hive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Brand Colors: 
+           Midnight Blue: #1f2a52
+           Teal: #00bec7
+           Light Aqua: #d2f0f0
+           Slate Grey: #abb5bf
+        */
+        :root {
+            --brand-midnight: #1f2a52;
+            --brand-teal: #00bec7;
+            --brand-aqua: #d2f0f0;
+            --brand-slate: #abb5bf;
+            --bg-light: #f8fafc;
+        }
+
+        body {
+            background-color: var(--brand-aqua); 
+            font-family: 'Inter', sans-serif;
+            color: var(--brand-midnight);
+            overflow-x: hidden;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 4-3-4 Honeycomb Formation */
+        .hive-viewport {
+            position: relative;
+            width: 100%;
+            max-width: 950px;
+            height: 580px;
+            margin: 10px auto;
+        }
+
+        .hexagon {
+            width: 180px;
+            height: 200px;
+            background-color: var(--brand-midnight); /* Front state: Dark Blue */
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 25px;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .hexagon .content-inner {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .hexagon:hover:not(.revealed):not(.vanished) {
+            transform: scale(1.08);
+            background-color: var(--brand-teal);
+            color: white;
+        }
+
+        .hexagon.revealed {
+            background-color: white;
+            color: var(--brand-midnight);
+            cursor: default;
+            transform: scale(1);
+            box-shadow: 0 10px 25px rgba(31, 42, 82, 0.1);
+        }
+
+        .hexagon.revealed .content-inner {
+            opacity: 1;
+        }
+
+        .hexagon.vanished {
+            opacity: 0;
+            transform: scale(0.1);
+            pointer-events: none;
+        }
+
+        .hexagon b {
+            display: block;
+            color: var(--brand-teal);
+            font-size: 1rem;
+            margin-bottom: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        /* 4-3-4 GRID POSITIONING */
+        .pos-0 { top: 0px; left: 50px; }
+        .pos-1 { top: 0px; left: 260px; }
+        .pos-2 { top: 0px; left: 470px; }
+        .pos-3 { top: 0px; left: 680px; }
+
+        .pos-4 { top: 160px; left: 155px; }
+        .pos-5 { top: 160px; left: 365px; }
+        .pos-6 { top: 160px; left: 575px; }
+
+        .pos-7 { top: 320px; left: 50px; }
+        .pos-8 { top: 320px; left: 260px; }
+        .pos-9 { top: 320px; left: 470px; }
+        .pos-10 { top: 320px; left: 680px; }
+
+        /* Centered Navigation Button */
+        #next-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-large-next {
+            background-color: var(--brand-midnight);
+            color: white;
+            padding: 20px 80px;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(31, 42, 82, 0.3);
+            border: 4px solid white;
+        }
+
+        .btn-large-next:hover {
+            background-color: var(--brand-teal);
+            transform: scale(1.05);
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            height: 10px;
+            background-color: white;
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--brand-teal);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(31, 42, 82, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border-top: 10px solid var(--brand-teal);
+        }
+    </style>
+</head>
+<body class="py-10">
+
+    <div class="w-full max-w-7xl px-4 flex flex-col items-center">
+        <div class="text-center">
+            <h1 id="page-title" class="text-3xl font-black mb-2 uppercase tracking-tight" style="color: var(--brand-midnight);">Lorem Ipsum Hive</h1>
+            <p id="page-desc" class="text-lg text-slate-600 max-w-2xl mx-auto italic font-medium">Explore the honeycombs to reveal the hidden information sections.</p>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div id="progress-line" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Discovery Area -->
+        <div class="hive-viewport" id="hive-container">
+            <!-- Centered Navigation Button -->
+            <div id="next-container" class="opacity-0 pointer-events-none transition-all duration-700 scale-75">
+                <button id="next-btn" class="btn-large-next" onclick="nextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Modal -->
+    <div id="modal">
+        <div class="modal-card shadow-2xl">
+            <div class="text-5xl mb-6">💡</div>
+            <h2 class="text-2xl font-black mb-4 uppercase" style="color: var(--brand-midnight);">Activity Complete</h2>
+            <p id="modal-text" class="text-lg text-slate-600 leading-relaxed mb-10">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <button onclick="location.reload()" class="w-full py-4 text-white rounded-xl font-bold uppercase tracking-widest transition-colors hover:bg-slate-700" style="background-color: var(--brand-midnight)">Restart Activity</button>
+        </div>
+    </div>
+
+    <script>
+        const pages = [
+            {
+                title: "Lorem Ipsum One",
+                desc: "Find and reveal the 5 hidden information sections.",
+                hexagons: [
+                    { type: 'filler', text: "Lorem" },
+                    { type: 'content', heading: "Topic Alpha", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." },
+                    { type: 'filler', text: "Ipsum" },
+                    { type: 'filler', text: "Dolor" },
+                    { type: 'content', heading: "Topic Beta", text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip." },
+                    { type: 'filler', text: "Sit" },
+                    { type: 'content', heading: "Topic Gamma", text: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+                    { type: 'content', heading: "Topic Delta", text: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia." },
+                    { type: 'filler', text: "Amet" },
+                    { type: 'filler', text: "Consectetur" },
+                    { type: 'content', heading: "Topic Epsilon", text: "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis." }
+                ]
+            },
+            {
+                title: "Lorem Ipsum Two",
+                desc: "Discover the next 5 hidden information sections.",
+                hexagons: [
+                    { type: 'content', heading: "Heading One", text: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium." },
+                    { type: 'filler', text: "Nemo" },
+                    { type: 'content', heading: "Heading Two", text: "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur." },
+                    { type: 'filler', text: "Enim" },
+                    { type: 'filler', text: "Minim" },
+                    { type: 'content', heading: "Heading Three", text: "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam." },
+                    { type: 'filler', text: "Vero" },
+                    { type: 'filler', text: "Amet" },
+                    { type: 'content', heading: "Heading Four", text: "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus." },
+                    { type: 'content', heading: "Heading Five", text: "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis." },
+                    { type: 'filler', text: "Eos" }
+                ]
+            }
+        ];
+
+        let currentPage = 0;
+        let revealedContentCount = 0;
+        let totalContentOnPage = 5;
+
+        function renderPage() {
+            const data = pages[currentPage];
+            document.getElementById('page-title').innerText = data.title;
+            document.getElementById('page-desc').innerText = data.desc;
+            
+            // RESET Progress state before rendering
+            revealedContentCount = 0;
+            const contentItems = data.hexagons.filter(h => h.type === 'content');
+            totalContentOnPage = contentItems.length;
+            updateProgress();
+
+            const nextCont = document.getElementById('next-container');
+            nextCont.classList.add('opacity-0', 'pointer-events-none', 'scale-75');
+            nextCont.classList.remove('scale-100');
+
+            const container = document.getElementById('hive-container');
+            const existingHexagons = container.querySelectorAll('.hexagon');
+            existingHexagons.forEach(h => h.remove());
+
+            data.hexagons.forEach((item, index) => {
+                const hex = document.createElement('div');
+                hex.className = `hexagon pos-${index}`;
+                
+                const inner = document.createElement('div');
+                inner.className = 'content-inner';
+                
+                if (item.type === 'content') {
+                    inner.innerHTML = `<b>${item.heading}</b>${item.text}`;
+                } else {
+                    inner.innerText = item.text || "Empty";
+                }
+                
+                hex.appendChild(inner);
+
+                hex.onclick = function() {
+                    if (this.classList.contains('revealed') || this.classList.contains('vanished')) return;
+
+                    if (item.type === 'content') {
+                        this.classList.add('revealed');
+                        revealedContentCount++;
+                        updateProgress();
+                        checkCompletion();
+                    } else {
+                        this.classList.add('vanished');
+                    }
+                };
+                container.appendChild(hex);
+            });
+        }
+
+        function updateProgress() {
+            const progressLine = document.getElementById('progress-line');
+            const percent = totalContentOnPage === 0 ? 0 : (revealedContentCount / totalContentOnPage) * 100;
+            progressLine.style.width = percent + '%';
+        }
+
+        function checkCompletion() {
+            if (revealedContentCount === totalContentOnPage) {
+                const nextCont = document.getElementById('next-container');
+                nextCont.classList.remove('opacity-0', 'pointer-events-none', 'scale-75');
+                nextCont.classList.add('scale-100');
+                
+                const btn = document.getElementById('next-btn');
+                if (currentPage === pages.length - 1) {
+                    btn.innerText = "Finish";
+                } else {
+                    btn.innerText = "Next";
+                }
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                renderPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showFinalModal();
+            }
+        }
+
+        function showFinalModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'flex';
+        }
+
+        renderPage();
+    </script>
+</body>
+</html>
